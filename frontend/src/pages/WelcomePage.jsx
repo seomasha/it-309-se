@@ -251,7 +251,7 @@ const WelcomePage = () => {
           src={ExpandConnections}
           alt="Expand"
           className="img-fluid mb-3"
-          style={{ maxWidth: "800px", height: "auto" }}
+          style={{ maxWidth: "600px", height: "auto" }}
         />
         <div className="px-3" style={{ maxWidth: "800px" }}>
           <h1 className="text-primary">Expand your connections</h1>
