@@ -4,11 +4,13 @@ import { IoIosPersonAdd } from "react-icons/io";
 import { userService } from "../service/userService";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const WelcomePage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
 
   const categories = [
     "IT",
@@ -60,7 +62,11 @@ const WelcomePage = () => {
     if (!validate()) return;
 
     const response = await userService.login({ email, password });
-    // localStorage.setItem("token", response);
+
+    if (response) {
+      localStorage.setItem("token", response);
+      navigate("/myprofile");
+    }
   };
 
   const handleEmailChange = (e) => {
