@@ -1,4 +1,5 @@
 import { FaSignInAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const SignUp = () => {
   return (
@@ -7,7 +8,9 @@ const SignUp = () => {
         <h1 className="text-primary">IBU | Startup</h1>
         <button className="btn btn-outline-primary d-flex align-items-center gap-2">
           <FaSignInAlt size={20} />
-          <span className="align-middle">Sign in</span>
+          <Link to="/" className="align-middle text-decoration-none">
+            Sign in
+          </Link>
         </button>
       </header>
 
@@ -79,7 +82,9 @@ const SignUp = () => {
 
             <p className="text-secondary">
               Already have an account? Click here to{" "}
-              <span className="text-primary">sign in.</span>
+              <Link to="/" className="text-primary text-decoration-none">
+                sign in.
+              </Link>
             </p>
           </form>
         </div>

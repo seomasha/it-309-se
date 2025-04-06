@@ -3,6 +3,7 @@ import ExpandConnections from "../assets/expand_connections.svg";
 import { IoIosPersonAdd } from "react-icons/io";
 import { userService } from "../service/userService";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const WelcomePage = () => {
   const [email, setEmail] = useState("");
@@ -19,6 +20,18 @@ const WelcomePage = () => {
     "GreenTech",
     "Gaming",
     "Marketing",
+  ];
+
+  const positions = [
+    "Software Engineer",
+    "Marketing Manager",
+    "Data Analyst",
+    "Graphic Designer",
+    "Product Manager",
+    "Sales Represntative",
+    "Consultant",
+    "Customer Support",
+    "UX/UI Designer",
   ];
 
   const validate = () => {
@@ -78,15 +91,21 @@ const WelcomePage = () => {
     <div className="text-dark">
       <header className="d-flex justify-content-between align-items-center p-3">
         <h1 className="text-primary">IBU | Startup</h1>
-        <button className="btn btn-outline-primary d-flex align-items-center gap-2">
+        <Link
+          to="/signup"
+          className="btn btn-outline-primary d-flex align-items-center gap-2 text-decoration-none"
+        >
           <IoIosPersonAdd size={20} />
           <span className="align-middle">Create an account</span>
-        </button>
+        </Link>
       </header>
 
-      <main className="d-flex align-items-center mb-5 p-5">
-        <div className="col-md-5 d-flex justify-content-center">
-          <form className="d-flex flex-column gap-3 w-75">
+      <main className="d-flex align-items-center mb-5 py-5">
+        <div className="col-12 col-md-6 mb-4 mb-md-0 d-flex justify-content-center">
+          <form
+            className="d-flex flex-column gap-3 w-100"
+            style={{ maxWidth: "400px" }}
+          >
             <h1 className="text-terciary">
               Welcome to <br />
               IBU Startup
@@ -143,24 +162,26 @@ const WelcomePage = () => {
 
             <p className="text-secondary">
               Don't have an account?{" "}
-              <span className="text-primary">Create one here</span>
+              <Link to="/signup" className="text-primary text-decoration-none">
+                Create one here
+              </Link>
             </p>
           </form>
         </div>
 
-        <div className="col-md-7 text-center">
+        <div className="col-12 col-md-6 text-center d-none d-md-block">
           <img src={WelcomeImage} alt="IBU Startup" className="img-fluid" />
         </div>
       </main>
 
       <section
-        className="section-background p-5 d-flex justify-content-center"
-        style={{ height: "400px" }}
+        className="section-background p-5 d-flex justify-content-center align-items-center"
+        style={{ minHeight: "500px" }}
       >
-        <div className="d-flex flex-row flex-wrap align-items-center gap-5">
+        <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-5 text-center text-md-start">
           <div>
             <h1 className="text-primary">Explore startups</h1>
-            <p className="text-secondary" style={{ width: "450px" }}>
+            <p className="text-secondary mx-auto" style={{ maxWidth: "450px" }}>
               In the realm of startup management tools, we're pioneering a new
               approach. Our platform seamlessly integrates expert insights into
               every feature, empowering entrepreneurs to navigate the challenges
@@ -169,8 +190,8 @@ const WelcomePage = () => {
           </div>
 
           <div
-            className="d-flex flex-row flex-wrap gap-0"
-            style={{ width: "450px" }}
+            className="d-flex flex-wrap justify-content-center"
+            style={{ maxWidth: "450px" }}
           >
             {categories.map((category, index) => (
               <div
@@ -188,21 +209,24 @@ const WelcomePage = () => {
       </section>
 
       <section
-        className="p-5 d-flex justify-content-center"
-        style={{ height: "400px" }}
+        className="p-5 d-flex justify-content-center align-items-center"
+        style={{ minHeight: "500px" }}
       >
-        <div className="d-flex flex-row flex-wrap align-items-center gap-5">
+        <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-5 text-center text-md-start">
           <div
-            className="d-flex flex-row flex-wrap gap-0"
-            style={{ width: "450px" }}
+            className="d-flex flex-wrap justify-content-center"
+            style={{ maxWidth: "580px" }}
           >
-            {categories.map((category, index) => (
+            {positions.map((category, index) => (
               <div
                 key={index}
-                className="d-flex justify-content-center"
+                className="d-flex justify-content-center align-items-center"
                 style={{ width: "33.33%" }}
               >
-                <p className="btn btn-outline-primary rounded-pill px-4">
+                <p
+                  className="btn btn-outline-primary rounded-pill px-4"
+                  style={{ whiteSpace: "nowrap" }}
+                >
                   {category}
                 </p>
               </div>
@@ -210,7 +234,7 @@ const WelcomePage = () => {
           </div>
           <div>
             <h1 className="text-primary">Explore positions</h1>
-            <p className="text-secondary" style={{ width: "450px" }}>
+            <p className="text-secondary mx-auto" style={{ maxWidth: "450px" }}>
               In the domain of startup management tools, we're innovating how
               positions are understood and optimized. Our platform synthesizes
               expert insights directly into position descriptions, streamlining
@@ -222,23 +246,26 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      <section className="d-flex column section-background p-5 align-items-center">
-        <img src={ExpandConnections} alt="IBU Startup" className="img-fluid" />
-        <div>
+      <section className="section-background py-5 text-center text-md-start d-flex justify-content-center flex-column flex-xl-row align-items-center gap-4">
+        <img
+          src={ExpandConnections}
+          alt="Expand"
+          className="img-fluid mb-3"
+          style={{ maxWidth: "800px", height: "auto" }}
+        />
+        <div className="px-3" style={{ maxWidth: "800px" }}>
           <h1 className="text-primary">Expand your connections</h1>
           <p className="text-secondary">
             Within startup management tools, we're bridging expertise with
             execution. Our platform integrates expert insights into position
-            management, empowering startups for sustainable growth. Together,
-            we're redefining how talent is leveraged for innovation and
-            strategic success.
+            management, empowering startups for sustainable growth.
           </p>
         </div>
       </section>
 
       <footer className="text-center my-4">
         <h4 className="text-primary">IBU Startup</h4>
-        <p className="text-secondary">Copyrighted © IBU Startup 2024</p>
+        <p className="text-secondary">© IBU Startup 2024</p>
       </footer>
     </div>
   );
