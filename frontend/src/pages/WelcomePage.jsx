@@ -265,7 +265,7 @@ const WelcomePage = () => {
 
       <footer className="text-center my-4">
         <h4 className="text-primary">IBU Startup</h4>
-        <p className="text-secondary">© IBU Startup 2024</p>
+        <p className="text-secondary">Copyrighted © IBU Startup 2024</p>
       </footer>
     </div>
   );
