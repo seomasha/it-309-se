@@ -16,9 +16,7 @@ class ErrorHandler {
           errorMsg =
             serverMessage || "Invalid request. Please check your input.";
 
-          if (
-            errorMsg === "Validation failed for object='user'. Error count: 1"
-          ) {
+          if (errorMsg.startsWith("Validation failed for object='user'.")) {
             errorMsg = "The password you have entered is incorrect.";
           }
           break;

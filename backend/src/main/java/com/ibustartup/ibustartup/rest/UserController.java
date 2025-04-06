@@ -4,13 +4,14 @@ import com.ibustartup.ibustartup.dto.EmailDTO;
 import com.ibustartup.ibustartup.dto.UserDTO;
 import com.ibustartup.ibustartup.model.User;
 import com.ibustartup.ibustartup.service.UserService;
+import com.ibustartup.ibustartup.utils.JwtUtil;
 import com.ibustartup.ibustartup.utils.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -19,9 +20,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping
@@ -49,7 +52,10 @@ public class UserController {
         final String password = loginRequest.getPassword();
 
         if (userService.verifyPassword(email, password)) {
-            return ResponseEntity.ok("Login successful");
+            final User user = userService.findUserByEmail(email)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+            final String token = jwtUtil.generateToken(user);
+            return ResponseEntity.ok(token);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
