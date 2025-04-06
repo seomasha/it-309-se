@@ -1,8 +1,14 @@
 import WelcomeImage from "../assets/welcome_page.svg";
 import ExpandConnections from "../assets/expand_connections.svg";
 import { IoIosPersonAdd } from "react-icons/io";
+import { userService } from "../service/userService";
+import { useState } from "react";
 
 const WelcomePage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({ email: "", password: "" });
+
   const categories = [
     "IT",
     "FinTech",
@@ -14,6 +20,59 @@ const WelcomePage = () => {
     "Gaming",
     "Marketing",
   ];
+
+  const validate = () => {
+    const newErrors = { email: "", password: "" };
+    let isValid = true;
+
+    if (!email) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Invalid email address";
+      isValid = false;
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    if (!validate()) return;
+
+    const response = await userService.login({ email, password });
+    // localStorage.setItem("token", response);
+  };
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+
+    if (!value) {
+      setErrors((prev) => ({ ...prev, email: "Email is required" }));
+    } else if (!/\S+@\S+\.\S+/.test(value)) {
+      setErrors((prev) => ({ ...prev, email: "Invalid email address" }));
+    } else {
+      setErrors((prev) => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    if (!value) {
+      setErrors((prev) => ({ ...prev, password: "Password is required" }));
+    } else {
+      setErrors((prev) => ({ ...prev, password: "" }));
+    }
+  };
 
   return (
     <div className="text-dark">
@@ -38,9 +97,14 @@ const WelcomePage = () => {
               <input
                 name="email"
                 type="email"
-                className="form-control"
+                className={`form-control ${errors.email ? "is-invalid" : ""}`}
                 placeholder="Enter your email"
+                onChange={handleEmailChange}
+                value={email}
               />
+              {errors.email && (
+                <div className="invalid-feedback">{errors.email}</div>
+              )}
             </div>
 
             <div className="mb-3 d-flex flex-column gap-2">
@@ -48,9 +112,16 @@ const WelcomePage = () => {
               <input
                 name="password"
                 type="password"
-                className="form-control"
+                className={`form-control ${
+                  errors.password ? "is-invalid" : ""
+                }`}
                 placeholder="Enter your password"
+                onChange={handlePasswordChange}
+                value={password}
               />
+              {errors.password && (
+                <div className="invalid-feedback">{errors.password}</div>
+              )}
             </div>
 
             <p className="text-primary">Forgot password?</p>
@@ -58,6 +129,7 @@ const WelcomePage = () => {
             <button
               type="submit"
               className="btn btn-outline-primary w-100 mb-3"
+              onClick={handleLogin}
             >
               Sign in
             </button>
@@ -77,7 +149,7 @@ const WelcomePage = () => {
         </div>
 
         <div className="col-md-7 text-center">
-          <img src={WelcomeImage} alt="IBU Startup" />
+          <img src={WelcomeImage} alt="IBU Startup" className="img-fluid" />
         </div>
       </main>
 
@@ -151,7 +223,7 @@ const WelcomePage = () => {
       </section>
 
       <section className="d-flex column section-background p-5 align-items-center">
-        <img src={ExpandConnections} height="600" />
+        <img src={ExpandConnections} alt="IBU Startup" className="img-fluid" />
         <div>
           <h1 className="text-primary">Expand your connections</h1>
           <p className="text-secondary">
