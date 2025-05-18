@@ -23,5 +23,11 @@ export const startupService = {
       method: "DELETE",
     });
     return response;
-  }
+  },
+  getAllStartups: async () => {
+    const response = await request(STARTUP_ENDPOINT, {
+      method: "GET",
+    });
+    return response;
+  },
 };

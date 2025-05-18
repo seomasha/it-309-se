@@ -224,6 +224,7 @@ const MyProfile = () => {
                   setEditStartup(startup);
                   setShowStartupModal(true);
                 }}
+                profile
               />
             ))}
           </div>

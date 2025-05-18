@@ -8,6 +8,7 @@ const StartupCard = ({
   location,
   companySize,
   onClick,
+  profile,
 }) => {
   return (
     <div
@@ -32,12 +33,14 @@ const StartupCard = ({
         <p className="startup-description mb-1">Industry: {industry}</p>
         <p className="startup-description mb-1">Location: {location}</p>
         <p className="startup-description mb-1">Company size: {companySize}</p>
-        <button
-          className="btn btn-outline-primary w-100 mt-5"
-          onClick={onClick}
-        >
-          Edit
-        </button>
+        {profile && (
+          <button
+            className="btn btn-outline-primary w-100 mt-5"
+            onClick={onClick}
+          >
+            Edit
+          </button>
+        )}
       </div>
     </div>
   );
