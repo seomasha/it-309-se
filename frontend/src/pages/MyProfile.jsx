@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import background from "../assets/blank-profile.png";
 import { IoIosAddCircle } from "react-icons/io";
@@ -17,6 +18,8 @@ const MyProfile = () => {
     username: "",
     phoneNo: "",
   });
+
+  const navigate = useNavigate();
 
   const decoded = getUserInfoFromToken(localStorage.getItem("token"));
 
@@ -56,6 +59,15 @@ const MyProfile = () => {
     setShowModal(false);
     const updatedUser = await userService.editProfile(user.id, formData);
     setUser(updatedUser);
+  };
+
+  const handleDeactivate = async () => {
+    const response = await userService.deactivateAccount(user.id, user.email);
+    if (response) {
+      localStorage.clear();
+      setShowModal(false);
+      navigate("/");
+    }
   };
 
   return (
@@ -194,21 +206,30 @@ const MyProfile = () => {
                   </div>
                 </form>
               </div>
-              <div className="modal-footer">
+              <div className="modal-footer d-flex justify-content-between">
                 <button
                   type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
+                  className="btn btn-danger"
+                  onClick={handleDeactivate}
                 >
-                  Close
+                  Deactivate Account
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSave}
-                >
-                  Save changes
-                </button>
+                <div className="d-flex gap-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSave}
+                  >
+                    Save changes
+                  </button>
+                </div>
               </div>
             </div>
           </div>

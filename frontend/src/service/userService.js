@@ -49,4 +49,11 @@ export const userService = {
     });
     return response;
   },
+  deactivateAccount: async (id, email) => {
+    const response = await request(`${USER_ENDPOINT}/deactivate-account`, {
+      method: "POST",
+      data: { email },
+    });
+    return response;
+  },
 };
