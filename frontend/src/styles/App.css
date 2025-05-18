@@ -13,3 +13,7 @@
 .hover-text-white:hover {
   color: white !important;
 }
+
+body {
+  color: #373737;
+}

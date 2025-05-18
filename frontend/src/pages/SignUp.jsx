@@ -128,7 +128,7 @@ const SignUp = () => {
     e.preventDefault();
     if (Object.values(errors).every((error) => error === "")) {
       userService.create(formData);
-      toast.success("Account succesfully created!");
+      //toast.success("Account succesfully created!"); //Fix validaiton error
       resetFields();
     }
   };

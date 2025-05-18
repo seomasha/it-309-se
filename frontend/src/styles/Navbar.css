@@ -1,0 +1,21 @@
+.icon {
+  color: #005682;
+}
+
+.search-bar {
+  border-color: #808080;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.search-bar:focus-within {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.search-bar .form-control:focus {
+  box-shadow: none;
+}
+
+.nav {
+  border-color: #808080;
+}
