@@ -6,19 +6,16 @@ import { ToastContainer } from "react-toastify";
 import WelcomePage from "./pages/WelcomePage";
 import MyProfile from "./pages/MyProfile";
 import SignUp from "./pages/SignUp";
-import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/myprofile" element={<MyProfile />} />
-        </Routes>
-        <ToastContainer position="top-right" autoClose={3000} />
-      </AuthProvider>
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/myprofile" element={<MyProfile />} />
+      </Routes>
+      <ToastContainer position="top-right" autoClose={3000} />
     </Router>
   );
 }

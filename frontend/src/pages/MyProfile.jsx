@@ -19,8 +19,9 @@ const MyProfile = () => {
     phoneNo: "",
   });
 
-  const navigate = useNavigate();
+  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
 
+  const navigate = useNavigate();
   const decoded = getUserInfoFromToken(localStorage.getItem("token"));
 
   useEffect(() => {
@@ -69,6 +70,8 @@ const MyProfile = () => {
       navigate("/");
     }
   };
+
+  const isDeleteInputValid = deleteConfirmationInput === user.username;
 
   return (
     <div className="body">
@@ -204,6 +207,23 @@ const MyProfile = () => {
                       onChange={handleInputChange}
                     />
                   </div>
+
+                  <hr />
+                  <div className="mb-3">
+                    <label className="form-label text-danger">
+                      To delete your account, type your username:{" "}
+                      <strong>{user.username}</strong>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter your username to confirm"
+                      value={deleteConfirmationInput}
+                      onChange={(e) =>
+                        setDeleteConfirmationInput(e.target.value)
+                      }
+                    />
+                  </div>
                 </form>
               </div>
               <div className="modal-footer d-flex justify-content-between">
@@ -211,6 +231,7 @@ const MyProfile = () => {
                   type="button"
                   className="btn btn-danger"
                   onClick={handleDeactivate}
+                  disabled={!isDeleteInputValid}
                 >
                   Delete Account
                 </button>
