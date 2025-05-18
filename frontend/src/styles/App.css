@@ -9,3 +9,11 @@
 .text-dark {
   color: #373737;
 }
+
+.hover-text-white:hover {
+  color: white !important;
+}
+
+body {
+  color: #373737;
+}
