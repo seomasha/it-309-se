@@ -1,12 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import background from "../assets/blank-profile.png";
 import { IoIosAddCircle } from "react-icons/io";
 import "../styles/MyProfile.css";
 import StartupCard from "../components/StartupCard";
 import blankProfile from "../assets/blank-profile.png";
+import { getUserInfoFromToken } from "../utils/jwtDecode";
+import { userService } from "../service/userService";
 
 const MyProfile = () => {
+  const [user, setUser] = useState(null);
+  const decoded = getUserInfoFromToken(localStorage.getItem("token"));
+
+  useEffect(() => {
+    const getUserData = async () => {
+      const response = await userService.findUserByEmail(decoded.sub);
+      setUser(response);
+    };
+    getUserData();
+  }, []);
+
+  console.log(user);
+
   return (
     <div className="body">
       <Navbar />
@@ -26,8 +41,10 @@ const MyProfile = () => {
             }}
           />
           <div className="profile-info text-center">
-            <h2 className="profile-name">John Doe</h2>
-            <p className="profile-username">@johndoe</p>
+            <h2 className="profile-name">
+              {user.firstName} {user.lastName}
+            </h2>
+            <p className="profile-username">@{user.username}</p>
           </div>
         </div>
       </div>
