@@ -49,4 +49,11 @@ export const userService = {
     });
     return response;
   },
+  deleteAccount: async (email) => {
+    const response = await request(`${USER_ENDPOINT}`, {
+      method: "DELETE",
+      data: { email },
+    });
+    return response;
+  },
 };

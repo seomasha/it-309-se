@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import background from "../assets/blank-profile.png";
 import { IoIosAddCircle } from "react-icons/io";
@@ -18,6 +19,9 @@ const MyProfile = () => {
     phoneNo: "",
   });
 
+  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
+
+  const navigate = useNavigate();
   const decoded = getUserInfoFromToken(localStorage.getItem("token"));
 
   useEffect(() => {
@@ -32,7 +36,18 @@ const MyProfile = () => {
       });
     };
     getUserData();
-  }, []);
+  }, [decoded.sub]);
+
+  if (!user) {
+    return (
+      <div className="body">
+        <Navbar />
+        <div className="container d-flex justify-content-center mt-5">
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({
@@ -46,6 +61,17 @@ const MyProfile = () => {
     const updatedUser = await userService.editProfile(user.id, formData);
     setUser(updatedUser);
   };
+
+  const handleDeactivate = async () => {
+    const response = await userService.deleteAccount(user.email);
+    if (response) {
+      localStorage.clear();
+      setShowModal(false);
+      navigate("/");
+    }
+  };
+
+  const isDeleteInputValid = deleteConfirmationInput === user.username;
 
   return (
     <div className="body">
@@ -181,23 +207,50 @@ const MyProfile = () => {
                       onChange={handleInputChange}
                     />
                   </div>
+
+                  <hr />
+                  <div className="mb-3">
+                    <label className="form-label text-danger">
+                      To delete your account, type your username:{" "}
+                      <strong>{user.username}</strong>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter your username to confirm"
+                      value={deleteConfirmationInput}
+                      onChange={(e) =>
+                        setDeleteConfirmationInput(e.target.value)
+                      }
+                    />
+                  </div>
                 </form>
               </div>
-              <div className="modal-footer">
+              <div className="modal-footer d-flex justify-content-between">
                 <button
                   type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
+                  className="btn btn-danger"
+                  onClick={handleDeactivate}
+                  disabled={!isDeleteInputValid}
                 >
-                  Close
+                  Delete Account
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSave}
-                >
-                  Save changes
-                </button>
+                <div className="d-flex gap-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSave}
+                  >
+                    Save changes
+                  </button>
+                </div>
               </div>
             </div>
           </div>
