@@ -7,6 +7,7 @@ import WelcomePage from "./pages/WelcomePage";
 import MyProfile from "./pages/MyProfile";
 import SignUp from "./pages/SignUp";
 import Startups from "./pages/Startups";
+import Home from "./pages/Home";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/myprofile" element={<MyProfile />} />
         <Route path="/startups" element={<Startups />} />
+        <Route path="/home" element={<Home />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </Router>

@@ -12,7 +12,7 @@ import {
   FaBell,
 } from "react-icons/fa";
 import NavIcon from "./NavIcon";
-import blankProfile from "../assets/blank-profile.png"; // Replace with your profile image
+import blankProfile from "../assets/blank-profile.png";
 
 const Navbar = () => {
   const navigate = useNavigate();
