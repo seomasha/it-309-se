@@ -18,9 +18,19 @@ const MyProfile = () => {
       setUser(response);
     };
     getUserData();
-  }, []);
+  }, [decoded.sub]);
 
-  console.log(user);
+  if (!user) {
+    // Show loading state while user data is being fetched
+    return (
+      <div className="body">
+        <Navbar />
+        <div className="container d-flex justify-content-center mt-5">
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="body">
@@ -88,4 +98,5 @@ const MyProfile = () => {
     </div>
   );
 };
+
 export default MyProfile;
