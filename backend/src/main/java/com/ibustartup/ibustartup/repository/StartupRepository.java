@@ -11,4 +11,5 @@ public interface StartupRepository extends JpaRepository<Startup, Long> {
     List<Startup> findByIndustry(String industry);
     List<Startup> findByNameContainingIgnoreCase(String name);
     List<Startup> findByLocationContainingIgnoreCase(String location);
+    List<Startup> findAllByOwner_Id(Long id);
 }
