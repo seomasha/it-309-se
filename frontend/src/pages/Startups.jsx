@@ -98,7 +98,6 @@ const Startups = () => {
 
       <div className="body">
         <div className="d-flex container py-5 gap-3">
-          {/* FILTERS */}
           <div className="col-2 bg-white rounded-4 border p-3">
             <div className="d-flex justify-content-between mb-3">
               <h6>Filters</h6>
@@ -135,7 +134,6 @@ const Startups = () => {
             ))}
           </div>
 
-          {/* MAIN CONTENT */}
           <div className="col-7">
             <SearchBar
               value={searchValue}
@@ -176,7 +174,6 @@ const Startups = () => {
             </div>
           </div>
 
-          {/* RECENT SEARCHES */}
           <div className="col-3 bg-white rounded-4 border p-3 h-100">
             <div className="d-flex justify-content-between">
               <p>Recent searches</p>
