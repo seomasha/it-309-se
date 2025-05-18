@@ -10,17 +10,42 @@ import { userService } from "../service/userService";
 
 const MyProfile = () => {
   const [user, setUser] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    phoneNo: "",
+  });
+
   const decoded = getUserInfoFromToken(localStorage.getItem("token"));
 
   useEffect(() => {
     const getUserData = async () => {
       const response = await userService.findUserByEmail(decoded.sub);
       setUser(response);
+      setFormData({
+        firstName: response.firstName || "",
+        lastName: response.lastName || "",
+        username: response.username || "",
+        phoneNo: response.phoneNo || "",
+      });
     };
     getUserData();
   }, []);
 
-  console.log(user);
+  const handleInputChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSave = async () => {
+    setShowModal(false);
+    const updatedUser = await userService.editProfile(user.id, formData);
+    setUser(updatedUser);
+  };
 
   return (
     <div className="body">
@@ -42,9 +67,16 @@ const MyProfile = () => {
           />
           <div className="profile-info text-center">
             <h2 className="profile-name">
-              {user.firstName} {user.lastName}
+              {user?.firstName} {user?.lastName}
             </h2>
-            <p className="profile-username">@{user.username}</p>
+            <p className="profile-username">@{user?.username}</p>
+
+            <button
+              className="btn btn-outline-primary mt-2"
+              onClick={() => setShowModal(true)}
+            >
+              Edit Profile
+            </button>
           </div>
         </div>
       </div>
@@ -85,7 +117,94 @@ const MyProfile = () => {
           </div>
         </div>
       </div>
+
+      {showModal && (
+        <div
+          className="modal fade show"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          tabIndex="-1"
+          role="dialog"
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            role="document"
+            onClick={() => setShowModal(false)}
+          >
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Profile</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                />
+              </div>
+              <div className="modal-body">
+                <form>
+                  <div className="mb-3">
+                    <label className="form-label">First Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Last Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Username</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Phone Number</label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      name="phoneNo"
+                      value={formData.phoneNo}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSave}
+                >
+                  Save changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 export default MyProfile;

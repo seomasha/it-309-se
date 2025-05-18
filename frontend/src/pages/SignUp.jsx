@@ -22,7 +22,7 @@ const SignUp = () => {
     username: "",
     password: "",
     confirmPassword: "",
-    phone: "",
+    phoneNo: "",
   });
 
   const handleChange = (e) => {
@@ -42,7 +42,7 @@ const SignUp = () => {
       username: "",
       password: "",
       confirmPassword: "",
-      phone: "",
+      phoneNo: "",
     });
 
     setErrors({
@@ -52,7 +52,7 @@ const SignUp = () => {
       username: "",
       password: "",
       confirmPassword: "",
-      phone: "",
+      phoneNo: "",
     });
   };
 
@@ -269,11 +269,11 @@ const SignUp = () => {
                   errors.phone ? "is-invalid" : ""
                 }`}
                 placeholder="Enter your phone number"
-                value={formData.phone}
+                value={formData.phoneNo}
                 onChange={handleChange}
               />
               {errors.phone && (
-                <div className="invalid-feedback">{errors.phone}</div>
+                <div className="invalid-feedback">{errors.phoneNo}</div>
               )}
             </label>
 
