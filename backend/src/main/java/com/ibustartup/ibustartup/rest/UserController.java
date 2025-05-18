@@ -87,4 +87,16 @@ public class UserController {
         final User updatedUser = userService.updateUser(id, userDTO);
         return ResponseEntity.ok(updatedUser);
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody @Valid EmailDTO emailDTO, @RequestParam String newPassword) {
+        userService.resetPassword(emailDTO.getEmail(), newPassword);
+        return ResponseEntity.ok("Password has been reset successfully.");
+    }
+
+    @PostMapping("/deactivate-account")
+    public ResponseEntity<String> deactivateAccount(@RequestBody @Valid EmailDTO emailDTO) {
+        userService.deactivateAccount(emailDTO.getEmail());
+        return ResponseEntity.ok("Account has been deactivated successfully.");
+    }
 }
