@@ -126,6 +126,11 @@ public class StartupServiceImpl implements StartupService {
     }
 
     @Override
+    public List<Startup> getStartupsByOwnerId(Long id) {
+        return startupRepository.findAllByOwner_Id(id);
+    }
+
+    @Override
     public Startup verifyStartup(Long id) {
         Startup startup = startupRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Startup not found"));

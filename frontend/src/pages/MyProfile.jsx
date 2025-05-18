@@ -8,9 +8,13 @@ import StartupCard from "../components/StartupCard";
 import blankProfile from "../assets/blank-profile.png";
 import { getUserInfoFromToken } from "../utils/jwtDecode";
 import { userService } from "../service/userService";
+import { startupService } from "../service/startupService";
+import { toast } from "react-toastify";
 
 const MyProfile = () => {
   const [user, setUser] = useState(null);
+  const [userStartups, setUserStartups] = useState([]);
+  const [editStartup, setEditStartup] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -20,6 +24,15 @@ const MyProfile = () => {
   });
 
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
+  const [showStartupModal, setShowStartupModal] = useState(false);
+  const [startupFormData, setStartupFormData] = useState({
+    name: "",
+    description: "",
+    industry: "",
+    location: "",
+    logoUrl: "",
+    size: "",
+  });
 
   const navigate = useNavigate();
   const decoded = getUserInfoFromToken(localStorage.getItem("token"));
@@ -37,6 +50,16 @@ const MyProfile = () => {
     };
     getUserData();
   }, [decoded.sub]);
+
+  useEffect(() => {
+    const getUserStartups = async () => {
+      const response = await startupService.getStartupbyOwnerId(user.id);
+      setUserStartups(response);
+    };
+    if (user) {
+      getUserStartups();
+    }
+  }, [user]);
 
   if (!user) {
     return (
@@ -68,6 +91,31 @@ const MyProfile = () => {
       localStorage.clear();
       setShowModal(false);
       navigate("/");
+    }
+  };
+
+  const handleSaveStartup = async () => {
+    if (editStartup) {
+      await startupService.updateStartup(editStartup.id, startupFormData);
+    } else {
+      await startupService.create({
+        ...startupFormData,
+        ownerId: user.id,
+      });
+    }
+    setEditStartup(null);
+    setShowStartupModal(false);
+    const updated = await startupService.getStartupbyOwnerId(user.id);
+    setUserStartups(updated);
+  };
+
+  const handleDeleteStartup = async (id) => {
+    const response = await startupService.deleteStartup(id);
+    if (response) {
+      toast.success(response);
+      const updated = await startupService.getStartupbyOwnerId(user.id);
+      setUserStartups(updated);
+      setShowStartupModal(false);
     }
   };
 
@@ -130,16 +178,55 @@ const MyProfile = () => {
         <div className="bg-white w-100 rounded-4 border">
           <div className="d-flex justify-content-between p-3 align-items-center">
             <h6 className="mt-2">Startups</h6>
-            <IoIosAddCircle size={24} className="primary-color" />
+            <IoIosAddCircle
+              size={24}
+              className="primary-color"
+              onClick={() => {
+                setStartupFormData({
+                  name: "",
+                  description: "",
+                  industry: "",
+                  location: "",
+                  logoUrl: "",
+                  size: "",
+                });
+                setEditStartup(null);
+                setShowStartupModal(true);
+              }}
+              style={{ cursor: "pointer" }}
+            />
           </div>
 
           <div className="d-flex flex-wrap justify-content-center gap-3 p-3">
-            <StartupCard
-              logo={blankProfile}
-              name="Tech Innovators"
-              description="A startup focused on innovative tech solutions for modern problems."
-              onClick={() => alert("Clicked!")}
-            />
+            {userStartups.length === 0 && (
+              <p className="text-center primary-color">
+                You have no startups yet. Click the plus icon to create one!
+              </p>
+            )}
+            {userStartups.map((startup) => (
+              <StartupCard
+                key={startup.id}
+                logo={blankProfile}
+                name={startup.name}
+                description={startup.description}
+                industry={startup.industry}
+                companySize={startup.size}
+                location={startup.location}
+                onClick={() => {
+                  setStartupFormData({
+                    name: startup.name,
+                    description: startup.description,
+                    industry: startup.industry,
+                    location: startup.location,
+                    logoUrl: startup.logoUrl,
+                    size: startup.size,
+                  });
+                  setEditStartup(startup);
+                  setShowStartupModal(true);
+                }}
+                profile
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -249,6 +336,153 @@ const MyProfile = () => {
                     onClick={handleSave}
                   >
                     Save changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStartupModal && (
+        <div
+          className="modal fade show"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          tabIndex="-1"
+          role="dialog"
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            role="document"
+            onClick={() => setShowStartupModal(false)}
+          >
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h5 className="modal-title">Create Startup</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowStartupModal(false)}
+                />
+              </div>
+              <div className="modal-body">
+                <form>
+                  <div className="mb-3">
+                    <label className="form-label">Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="name"
+                      value={startupFormData.name}
+                      onChange={(e) =>
+                        setStartupFormData({
+                          ...startupFormData,
+                          name: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Description</label>
+                    <textarea
+                      className="form-control"
+                      name="description"
+                      value={startupFormData.description}
+                      onChange={(e) =>
+                        setStartupFormData({
+                          ...startupFormData,
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Industry</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="industry"
+                      value={startupFormData.industry}
+                      onChange={(e) =>
+                        setStartupFormData({
+                          ...startupFormData,
+                          industry: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Location</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="location"
+                      value={startupFormData.location}
+                      onChange={(e) =>
+                        setStartupFormData({
+                          ...startupFormData,
+                          location: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Company Size</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="size"
+                      value={startupFormData.size}
+                      onChange={(e) =>
+                        setStartupFormData({
+                          ...startupFormData,
+                          size: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Logo URL</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="logoUrl"
+                      value={startupFormData.logoUrl}
+                      onChange={(e) =>
+                        setStartupFormData({
+                          ...startupFormData,
+                          logoUrl: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </form>
+              </div>
+              <div className="modal-footer d-flex justify-content-between">
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => handleDeleteStartup(editStartup.id)}
+                >
+                  Delete Startup
+                </button>
+                <div className="d-flex gap-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setEditStartup(null);
+                      setShowStartupModal(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveStartup}
+                  >
+                    Create
                   </button>
                 </div>
               </div>

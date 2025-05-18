@@ -20,4 +20,5 @@ public interface StartupService {
     List<Startup> getStartupsByIndustry(String industry);
     List<Startup> getStartupsByName(String name);
     List<Startup> getStartupsByLocation(String location);
+    List<Startup> getStartupsByOwnerId(Long id);
 }

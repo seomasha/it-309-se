@@ -1,6 +1,15 @@
 import React from "react";
 
-const StartupCard = ({ logo, name, description, onClick }) => {
+const StartupCard = ({
+  logo,
+  name,
+  description,
+  industry,
+  location,
+  companySize,
+  onClick,
+  profile,
+}) => {
   return (
     <div
       className="startup-card border rounded-4 shadow-sm"
@@ -19,14 +28,19 @@ const StartupCard = ({ logo, name, description, onClick }) => {
         />
       )}
       <div className="p-3">
-        <h3 className="startup-name mb-2">{name}</h3>
-        <p className="startup-description mb-3">{description}</p>
-        <button
-          className="btn btn-outline-primary w-100 mt-5"
-          onClick={onClick}
-        >
-          View More
-        </button>
+        <h3 className="startup-name mb-2 text-center primary-color">{name}</h3>
+        <p className="startup-description mb-5 text-center">{description}</p>
+        <p className="startup-description mb-1">Industry: {industry}</p>
+        <p className="startup-description mb-1">Location: {location}</p>
+        <p className="startup-description mb-1">Company size: {companySize}</p>
+        {profile && (
+          <button
+            className="btn btn-outline-primary w-100 mt-5"
+            onClick={onClick}
+          >
+            Edit
+          </button>
+        )}
       </div>
     </div>
   );

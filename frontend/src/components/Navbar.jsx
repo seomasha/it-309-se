@@ -23,7 +23,7 @@ const Navbar = () => {
 
   return (
     <header className="nav d-flex justify-content-between p-3 px-4 border-bottom align-items-center">
-      <div className="d-flex primary-color">
+      <div className="d-flex primary-color gap-3">
         <img src={logo} width={50} height={40} />
         <SearchBar />
       </div>

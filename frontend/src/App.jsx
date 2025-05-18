@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import WelcomePage from "./pages/WelcomePage";
 import MyProfile from "./pages/MyProfile";
 import SignUp from "./pages/SignUp";
+import Startups from "./pages/Startups";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<WelcomePage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/myprofile" element={<MyProfile />} />
+        <Route path="/startups" element={<Startups />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </Router>
