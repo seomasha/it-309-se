@@ -49,9 +49,9 @@ export const userService = {
     });
     return response;
   },
-  deactivateAccount: async (id, email) => {
-    const response = await request(`${USER_ENDPOINT}/deactivate-account`, {
-      method: "POST",
+  deleteAccount: async (email) => {
+    const response = await request(`${USER_ENDPOINT}`, {
+      method: "DELETE",
       data: { email },
     });
     return response;

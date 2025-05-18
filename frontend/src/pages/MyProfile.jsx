@@ -62,7 +62,7 @@ const MyProfile = () => {
   };
 
   const handleDeactivate = async () => {
-    const response = await userService.deactivateAccount(user.id, user.email);
+    const response = await userService.deleteAccount(user.email);
     if (response) {
       localStorage.clear();
       setShowModal(false);
@@ -212,7 +212,7 @@ const MyProfile = () => {
                   className="btn btn-danger"
                   onClick={handleDeactivate}
                 >
-                  Deactivate Account
+                  Delete Account
                 </button>
                 <div className="d-flex gap-3">
                   <button
