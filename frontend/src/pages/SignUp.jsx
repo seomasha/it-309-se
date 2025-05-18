@@ -22,7 +22,7 @@ const SignUp = () => {
     username: "",
     password: "",
     confirmPassword: "",
-    phone: "",
+    phoneNo: "",
   });
 
   const handleChange = (e) => {
@@ -42,7 +42,7 @@ const SignUp = () => {
       username: "",
       password: "",
       confirmPassword: "",
-      phone: "",
+      phoneNo: "",
     });
 
     setErrors({
@@ -52,7 +52,7 @@ const SignUp = () => {
       username: "",
       password: "",
       confirmPassword: "",
-      phone: "",
+      phoneNo: "",
     });
   };
 
@@ -108,7 +108,7 @@ const SignUp = () => {
           newErrors.confirmPassword = "";
         }
         break;
-      case "phone":
+      case "phoneNo":
         if (!value) {
           newErrors.phone = "Phone number is required.";
         } else if (!/^\+?\d{10,15}$/.test(value)) {
@@ -260,20 +260,20 @@ const SignUp = () => {
               )}
             </label>
 
-            <label htmlFor="phone" className="form-label">
+            <label htmlFor="phoneNo" className="form-label">
               Phone number
               <input
                 type="text"
-                id="phone"
+                id="phoneNo"
                 className={`form-control mt-2 ${
-                  errors.phone ? "is-invalid" : ""
+                  errors.phoneNo ? "is-invalid" : ""
                 }`}
                 placeholder="Enter your phone number"
-                value={formData.phone}
+                value={formData.phoneNo}
                 onChange={handleChange}
               />
-              {errors.phone && (
-                <div className="invalid-feedback">{errors.phone}</div>
+              {errors.phoneNo && (
+                <div className="invalid-feedback">{errors.phoneNo}</div>
               )}
             </label>
 

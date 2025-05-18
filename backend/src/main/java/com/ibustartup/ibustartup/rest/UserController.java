@@ -3,17 +3,21 @@ package com.ibustartup.ibustartup.rest;
 import com.ibustartup.ibustartup.dto.EmailDTO;
 import com.ibustartup.ibustartup.dto.UserDTO;
 import com.ibustartup.ibustartup.model.User;
+import com.ibustartup.ibustartup.repository.UserRepository;
 import com.ibustartup.ibustartup.service.UserService;
 import com.ibustartup.ibustartup.utils.JwtUtil;
 import com.ibustartup.ibustartup.utils.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -21,10 +25,12 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
-    public UserController(UserService userService, JwtUtil jwtUtil) {
+    public UserController(UserService userService, JwtUtil jwtUtil, UserRepository userRepository) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -51,9 +57,15 @@ public class UserController {
         final String email = loginRequest.getEmail();
         final String password = loginRequest.getPassword();
 
+        final User user = userService.findUserByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+
+        if(user.getStatus().equals("deactivated")) {
+            user.setStatus("active");
+            userRepository.save(user);
+        }
+
         if (userService.verifyPassword(email, password)) {
-            final User user = userService.findUserByEmail(email)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
             final String token = jwtUtil.generateToken(user);
             return ResponseEntity.ok(token);
         } else {
@@ -66,10 +78,11 @@ public class UserController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.ok("User with the id " + id + " has been deleted.");
+    @DeleteMapping
+    public ResponseEntity<String> deleteUser(@RequestBody EmailDTO emailDTO) {
+        final Optional<User> deletedUser = userRepository.findUserByEmail(emailDTO.getEmail());
+        userService.deleteUser(deletedUser.get().getId());
+        return ResponseEntity.ok("User with the email " + deletedUser.get().getEmail() + " has been deleted.");
     }
 
     @PostMapping("/email")
@@ -92,11 +105,5 @@ public class UserController {
     public ResponseEntity<String> resetPassword(@RequestBody @Valid EmailDTO emailDTO, @RequestParam String newPassword) {
         userService.resetPassword(emailDTO.getEmail(), newPassword);
         return ResponseEntity.ok("Password has been reset successfully.");
-    }
-
-    @PostMapping("/deactivate-account")
-    public ResponseEntity<String> deactivateAccount(@RequestBody @Valid EmailDTO emailDTO) {
-        userService.deactivateAccount(emailDTO.getEmail());
-        return ResponseEntity.ok("Account has been deactivated successfully.");
     }
 }
