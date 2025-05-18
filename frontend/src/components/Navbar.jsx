@@ -27,12 +27,12 @@ const Navbar = () => {
         <img src={logo} width={50} height={40} />
         <SearchBar />
       </div>
-      <div className="d-flex gap-4">
+      <div className="d-flex gap-4 align-items-center">
         {navIcons.map((item) => (
           <NavIcon key={item.id} icon={item.icon} title={item.title} />
         ))}
+        <NavIcon image title="My profile" />
       </div>
-      <NavIcon image title="My profile" />
     </header>
   );
 };
