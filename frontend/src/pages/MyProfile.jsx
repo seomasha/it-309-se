@@ -32,7 +32,18 @@ const MyProfile = () => {
       });
     };
     getUserData();
-  }, []);
+  }, [decoded.sub]);
+
+  if (!user) {
+    return (
+      <div className="body">
+        <Navbar />
+        <div className="container d-flex justify-content-center mt-5">
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({
