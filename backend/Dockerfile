@@ -1,5 +1,5 @@
 # Build stage
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 # Set the working directory
 WORKDIR /app
 # Copy Maven Wrapper directory and files
@@ -17,7 +17,7 @@ RUN ./mvnw dependency:go-offline -B
 COPY src ./src
 RUN ./mvnw clean package -DskipTests
 # Runtime stage
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:21-jre-jammy
 # Set the working directory for runtime
 WORKDIR /app
 # Copy the built JAR file from the builder stage
