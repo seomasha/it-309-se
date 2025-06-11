@@ -11,6 +11,7 @@ class ErrorHandler {
       switch (statusCode) {
         case 409:
           errorMsg = serverMessage || "This email is already registered.";
+          toast.error(errorMsg);
           break;
         case 400:
           errorMsg =
@@ -19,9 +20,11 @@ class ErrorHandler {
           if (errorMsg.startsWith("Validation failed for object='user'.")) {
             errorMsg = "The password you have entered is incorrect.";
           }
+          toast.error(errorMsg);
           break;
         case 500:
           errorMsg = "Server error. Please try again later.";
+          toast.error(errorMsg);
           break;
         default:
           errorMsg = `Error: ${serverMessage || "An error occurred."}`;
@@ -33,7 +36,6 @@ class ErrorHandler {
     }
 
     console.error(errorMsg);
-    toast.error(errorMsg);
 
     return errorMsg;
   }

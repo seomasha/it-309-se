@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "../styles/Navbar.css";
@@ -13,9 +13,14 @@ import {
 } from "react-icons/fa";
 import NavIcon from "./NavIcon";
 import blankProfile from "../assets/blank-profile.png";
+import { getUserInfoFromToken } from "../utils/jwtDecode";
+import { userService } from "../service/userService";
+import { photoService } from "../service/photoService";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const [profileImage, setProfileImage] = useState(blankProfile);
+  const [user, setUser] = useState(null);
 
   const navIcons = [
     { id: 1, icon: <IoMdHome size={22} />, title: "Home", route: "/home" },
@@ -45,6 +50,37 @@ const Navbar = () => {
     },
   ];
 
+  useEffect(() => {
+    const loadUserProfileImage = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const decoded = getUserInfoFromToken(token);
+        if (!decoded?.sub) return;
+
+        const userData = await userService.findUserByEmail(decoded.sub);
+        if (!userData?.id) return;
+
+        setUser(userData);
+
+        const profileImg = await photoService.getPhotoByEntityAndRole(
+          userData.id,
+          "user",
+          "profile"
+        );
+
+        if (profileImg?.url) {
+          setProfileImage(profileImg.url);
+        }
+      } catch (error) {
+        console.error("Error loading user profile image:", error);
+      }
+    };
+
+    loadUserProfileImage();
+  }, []);
+
   const handleSignOut = () => {
     localStorage.clear();
     navigate("/");
@@ -69,14 +105,21 @@ const Navbar = () => {
 
         <div className="dropdown">
           <img
-            src={blankProfile}
+            src={profileImage}
             alt="Profile"
             width={30}
             height={30}
             className="dropdown-toggle"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            style={{ cursor: "pointer", borderRadius: "50%" }}
+            style={{
+              cursor: "pointer",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+            onError={(e) => {
+              e.target.src = blankProfile;
+            }}
           />
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
