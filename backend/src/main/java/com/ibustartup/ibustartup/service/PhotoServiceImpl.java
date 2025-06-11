@@ -59,7 +59,14 @@ public class PhotoServiceImpl implements PhotoService {
                                   final Long entityId,
                                   final String entityType,
                                   final String role) throws IOException {
-        final String fileName = file.getOriginalFilename();
+        String originalFileName = file.getOriginalFilename();
+        String extension = "";
+
+        if (originalFileName != null && originalFileName.contains(".")) {
+            extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        }
+
+        String fileName = java.util.UUID.randomUUID() + extension;
 
         Photo existingPhoto = photoRepository.findByEntityIdAndEntityTypeAndRole(entityId, entityType, role);
 
