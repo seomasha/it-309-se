@@ -40,6 +40,8 @@ const MyProfile = () => {
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [uploadingProfile, setUploadingProfile] = useState(false);
   const [uploadingBackground, setUploadingBackground] = useState(false);
+  const [uploadingStartupLogo, setUploadingStartupLogo] = useState(false);
+  const [startupLogos, setStartupLogos] = useState({});
 
   const navigate = useNavigate();
   const decoded = getUserInfoFromToken(localStorage.getItem("token"));
@@ -64,6 +66,9 @@ const MyProfile = () => {
     const getUserStartups = async () => {
       const response = await startupService.getStartupbyOwnerId(user.id);
       setUserStartups(response);
+
+      // Load logos for all startups
+      await loadStartupLogos(response);
     };
     if (user) {
       getUserStartups();
@@ -90,20 +95,54 @@ const MyProfile = () => {
     }
   };
 
-  const handleImageUpload = async (file, role) => {
+  const loadStartupLogos = async (startups) => {
+    try {
+      const logoPromises = startups.map(async (startup) => {
+        try {
+          const logoImg = await photoService.getPhotoByEntityAndRole(
+            startup.id,
+            "startup",
+            "logo"
+          );
+          return { startupId: startup.id, logo: logoImg?.url || blankProfile };
+        } catch (error) {
+          console.error(`Error loading logo for startup ${startup.id}:`, error);
+          return { startupId: startup.id, logo: blankProfile };
+        }
+      });
+
+      const logoResults = await Promise.all(logoPromises);
+      const logoMap = {};
+      logoResults.forEach(({ startupId, logo }) => {
+        logoMap[startupId] = logo;
+      });
+      setStartupLogos(logoMap);
+    } catch (error) {
+      console.error("Error loading startup logos:", error);
+    }
+  };
+
+  const handleImageUpload = async (
+    file,
+    role,
+    entityId = null,
+    entityType = "user"
+  ) => {
     if (!file || !user) return;
 
     const formData = new FormData();
     formData.append("files", file);
-    formData.append("entityId", user.id.toString());
-    formData.append("entityType", "user");
+    formData.append("entityId", (entityId || user.id).toString());
+    formData.append("entityType", entityType);
     formData.append("role", role);
 
     try {
       if (role === "profile") {
         setUploadingProfile(true);
-      } else {
+      } else if (role === "background") {
         setUploadingBackground(true);
+      } else if (role === "logo") {
+        setUploadingStartupLogo(true);
       }
 
       const response = await photoService.uploadPhoto(formData);
@@ -111,23 +150,39 @@ const MyProfile = () => {
       if (response) {
         toast.success(
           `${
-            role === "profile" ? "Profile" : "Background"
+            role === "profile"
+              ? "Profile"
+              : role === "background"
+              ? "Background"
+              : "Logo"
           } image updated successfully!`
         );
-        await loadUserImages(user.id);
+
+        if (role === "logo" && entityId) {
+          // Reload startup logos
+          await loadStartupLogos(userStartups);
+        } else {
+          await loadUserImages(user.id);
+        }
       }
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error(
         `Failed to upload ${
-          role === "profile" ? "profile" : "background"
+          role === "profile"
+            ? "profile"
+            : role === "background"
+            ? "background"
+            : "logo"
         } image`
       );
     } finally {
       if (role === "profile") {
         setUploadingProfile(false);
-      } else {
+      } else if (role === "background") {
         setUploadingBackground(false);
+      } else if (role === "logo") {
+        setUploadingStartupLogo(false);
       }
     }
   };
@@ -165,6 +220,24 @@ const MyProfile = () => {
       }
 
       handleImageUpload(file, "background");
+    }
+  };
+
+  const handleStartupLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file && editStartup) {
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please select a valid image file (JPEG, PNG, or GIF)");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
+
+      handleImageUpload(file, "logo", editStartup.id, "startup");
     }
   };
 
@@ -214,6 +287,7 @@ const MyProfile = () => {
     setShowStartupModal(false);
     const updated = await startupService.getStartupbyOwnerId(user.id);
     setUserStartups(updated);
+    await loadStartupLogos(updated);
   };
 
   const handleDeleteStartup = async (id) => {
@@ -222,6 +296,7 @@ const MyProfile = () => {
       toast.success(response);
       const updated = await startupService.getStartupbyOwnerId(user.id);
       setUserStartups(updated);
+      await loadStartupLogos(updated);
       setShowStartupModal(false);
     }
   };
@@ -356,7 +431,7 @@ const MyProfile = () => {
             {userStartups.map((startup) => (
               <StartupCard
                 key={startup.id}
-                logo={blankProfile}
+                logo={startupLogos[startup.id] || blankProfile}
                 name={startup.name}
                 description={startup.description}
                 industry={startup.industry}
@@ -503,7 +578,7 @@ const MyProfile = () => {
           role="dialog"
         >
           <div
-            className="modal-dialog modal-dialog-centered"
+            className="modal-dialog modal-dialog-centered modal-lg"
             role="document"
             onClick={() => setShowStartupModal(false)}
           >
@@ -520,6 +595,51 @@ const MyProfile = () => {
               </div>
               <div className="modal-body">
                 <form>
+                  {/* Logo Upload Section */}
+                  {editStartup && (
+                    <div className="mb-4">
+                      <label className="form-label">Startup Logo</label>
+                      <div className="d-flex align-items-center gap-3">
+                        <div
+                          className="startup-logo-preview border rounded"
+                          style={{
+                            width: "80px",
+                            height: "80px",
+                            backgroundImage: `url(${
+                              startupLogos[editStartup.id] || blankProfile
+                            })`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }}
+                        />
+                        <div>
+                          <label
+                            htmlFor="startup-logo-upload"
+                            className="btn btn-outline-primary btn-sm"
+                            style={{ cursor: "pointer" }}
+                          >
+                            <FaCamera className="me-2" />
+                            {uploadingStartupLogo
+                              ? "Uploading..."
+                              : "Change Logo"}
+                          </label>
+                          <input
+                            id="startup-logo-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleStartupLogoChange}
+                            style={{ display: "none" }}
+                            disabled={uploadingStartupLogo}
+                          />
+                          <div className="form-text">
+                            Upload an image file (JPEG, PNG, or GIF). Max size:
+                            5MB
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="mb-3">
                     <label className="form-label">Name</label>
                     <input
@@ -540,6 +660,7 @@ const MyProfile = () => {
                     <textarea
                       className="form-control"
                       name="description"
+                      rows="3"
                       value={startupFormData.description}
                       onChange={(e) =>
                         setStartupFormData({
@@ -595,7 +716,7 @@ const MyProfile = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Logo URL</label>
+                    <label className="form-label">Logo URL (Optional)</label>
                     <input
                       type="text"
                       className="form-control"
@@ -608,6 +729,10 @@ const MyProfile = () => {
                         })
                       }
                     />
+                    <div className="form-text">
+                      You can provide a URL or upload an image above (for
+                      existing startups)
+                    </div>
                   </div>
                 </form>
               </div>
