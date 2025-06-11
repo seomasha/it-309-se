@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import blankImage from "../assets/blank-profile.png";
+import { photoService } from "../service/photoService";
 import { getUserInfoFromToken } from "../utils/jwtDecode";
 import { userService } from "../service/userService";
 import { startupService } from "../service/startupService";
@@ -15,14 +16,15 @@ const Home = () => {
   const [posts, setPosts] = useState([]);
   const [newPostContent, setNewPostContent] = useState("");
   const [loading, setLoading] = useState(true);
-  
+
   const token = localStorage.getItem("token");
   const decoded = token ? getUserInfoFromToken(token) : null;
+  const [profileImage, setProfileImage] = useState(blankImage);
 
   useEffect(() => {
     const getUserData = async () => {
       if (!decoded?.sub) return;
-      
+
       try {
         const response = await userService.findUserByEmail(decoded.sub);
         setUser(response);
@@ -30,7 +32,7 @@ const Home = () => {
         console.error("Error fetching user data:", error);
       }
     };
-    
+
     if (decoded) {
       getUserData();
     }
@@ -46,9 +48,23 @@ const Home = () => {
         setUserStartups([]);
       }
     };
-    
+
+    const loadProfileImage = async () => {
+      if (!user?.id) return;
+
+      const img = await photoService.getPhotoByEntityAndRole(
+        user.id,
+        "user",
+        "profile"
+      );
+      if (img?.url) {
+        setProfileImage(img.url);
+      }
+    };
+
     if (user?.id) {
       getUserStartups();
+      loadProfileImage();
     }
   }, [user?.id]);
 
@@ -74,7 +90,7 @@ const Home = () => {
       console.error("Cannot create post: content is empty");
       return;
     }
-    
+
     if (!user?.id) {
       console.error("Cannot create post: user ID not available", user);
       return;
@@ -84,9 +100,9 @@ const Home = () => {
       const postData = {
         content: newPostContent,
         authorId: user.id,
-        imageUrl: null
+        imageUrl: null,
       };
-      
+
       await postService.createPost(postData);
       setNewPostContent("");
       loadPosts();
@@ -121,7 +137,15 @@ const Home = () => {
       <div className="col-12 d-flex container gap-4 mt-5">
         <div className="col-3">
           <div className="bg-white border rounded-4 text-center py-3">
-            <img src={blankImage} width={150} className="rounded-circle" />
+            <img
+              src={profileImage}
+              width={150}
+              height={150}
+              className="rounded-circle"
+              onError={(e) => {
+                e.target.src = blankImage;
+              }}
+            />
             <h5 className="primary-color mt-3">
               {user?.firstName} {user?.lastName}
             </h5>
@@ -134,7 +158,10 @@ const Home = () => {
             <h5 className="primary-color">My Startups</h5>
             {userStartups.length > 0 ? (
               userStartups.map((startup) => (
-                <div key={startup.id} className="align-items-center text-start mx-4 py-2">
+                <div
+                  key={startup.id}
+                  className="align-items-center text-start mx-4 py-2"
+                >
                   <p>{startup.name}</p>
                 </div>
               ))
@@ -148,10 +175,15 @@ const Home = () => {
           <div className="bg-white border rounded-4 py-3">
             <div className="d-flex align-items-center">
               <img
-                src={blankImage}
+                src={profileImage}
                 width={28}
+                height={28}
                 className="rounded-circle mx-3"
+                onError={(e) => {
+                  e.target.src = blankImage;
+                }}
               />
+
               <p className="my-auto text-secondary">{user?.username}</p>
             </div>
             <textarea
@@ -162,7 +194,7 @@ const Home = () => {
               onChange={(e) => setNewPostContent(e.target.value)}
             />
             <div className="d-flex justify-content-end mt-2 mx-4">
-              <button 
+              <button
                 className="btn btn-primary"
                 onClick={handleCreatePost}
                 disabled={!newPostContent.trim() || !user?.id}
@@ -180,9 +212,9 @@ const Home = () => {
             </div>
           ) : posts.length > 0 ? (
             posts.map((post) => (
-              <Post 
-                key={post.id} 
-                post={post} 
+              <Post
+                key={post.id}
+                post={post}
                 currentUser={user}
                 onLike={handlePostLike}
                 onComment={handlePostComment}
