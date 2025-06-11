@@ -31,7 +31,7 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
       console.error("Cannot like: user not logged in");
       return;
     }
-    
+
     try {
       await postService.likePost(post.id, currentUser.id);
       setIsLiked(!isLiked);
@@ -46,7 +46,7 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
       console.error("Cannot comment: missing content or user not logged in");
       return;
     }
-    
+
     try {
       await postService.addComment(post.id, {
         content: newComment,
@@ -62,13 +62,13 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Unknown time";
-    
+
     try {
       const date = new Date(dateString);
       const now = new Date();
       const diffMs = now - date;
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      
+
       if (diffHours < 1) return "now";
       if (diffHours < 24) return `${diffHours}h`;
       return date.toLocaleDateString();
@@ -79,7 +79,11 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
 
   // Helper function to get display name
   const getDisplayName = (authorName, username) => {
-    if (authorName && authorName !== "null null" && !authorName.includes("null")) {
+    if (
+      authorName &&
+      authorName !== "null null" &&
+      !authorName.includes("null")
+    ) {
       return authorName;
     }
     if (username) {
@@ -93,8 +97,12 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
     if (username) {
       return `@${username}`;
     }
-    if (authorName && authorName !== "null null" && !authorName.includes("null")) {
-      return `@${authorName.toLowerCase().replace(/\s+/g, '')}`;
+    if (
+      authorName &&
+      authorName !== "null null" &&
+      !authorName.includes("null")
+    ) {
+      return `@${authorName.toLowerCase().replace(/\s+/g, "")}`;
     }
     return "@unknown";
   };
@@ -106,7 +114,12 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
     <div className="bg-white border rounded-4 my-3">
       <div className="d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
-          <img src={blankImage} width={50} className="rounded-circle mx-3" />
+          <img
+            src={post.imageUrl}
+            width={50}
+            height={50}
+            className="rounded-circle mx-3"
+          />
           <div className="mt-2 lh-sm">
             <h6 className="mt-3 primary-color">
               {displayName}
@@ -120,39 +133,27 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
       </div>
 
       <p className="mx-3">{post.content}</p>
-      
-      {post.imageUrl && (
-        <div className="p-3">
-          <div
-            className="rounded"
-            style={{
-              backgroundImage: `url(${post.imageUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              height: "300px",
-            }}
-          />
-        </div>
-      )}
 
       <div className="d-flex justify-content-between my-3 mx-3">
-        <button 
-          className={`btn ${isLiked ? 'btn-primary' : 'btn-outline-primary'} d-flex gap-2 align-items-center`}
+        <button
+          className={`btn ${
+            isLiked ? "btn-primary" : "btn-outline-primary"
+          } d-flex gap-2 align-items-center`}
           onClick={handleLike}
           disabled={!currentUser}
         >
           <FaHeart />
           Like ({post.likeCount || 0})
         </button>
-        
-        <button 
+
+        <button
           className="btn btn-outline-primary d-flex gap-2 align-items-center"
           onClick={() => setShowComments(!showComments)}
         >
           <FaCloud />
           Comment ({post.commentCount || 0})
         </button>
-        
+
         <button className="btn btn-outline-primary d-flex gap-2 align-items-center">
           <IoIosSend />
           Share
@@ -169,10 +170,10 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
                 placeholder="Write a comment..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
+                onKeyPress={(e) => e.key === "Enter" && handleAddComment()}
                 disabled={!currentUser}
               />
-              <button 
+              <button
                 className="btn btn-primary"
                 onClick={handleAddComment}
                 disabled={!newComment.trim() || !currentUser}
@@ -180,18 +181,22 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
                 Post
               </button>
             </div>
-            
+
             {comments.map((comment) => (
               <div key={comment.id} className="d-flex gap-2 mb-2">
-                <img src={blankImage} height={50} width={50} className="rounded-circle" />
                 <div className="flex-grow-1">
                   <div className="bg-light rounded p-2">
                     <small className="fw-bold">
-                      {getDisplayName(comment.authorName, currentUser?.username)}
+                      {getDisplayName(
+                        comment.authorName,
+                        currentUser?.username
+                      )}
                     </small>
                     <p className="mb-0 small">{comment.content}</p>
                   </div>
-                  <small className="text-muted">{formatDate(comment.createdAt)}</small>
+                  <small className="text-muted">
+                    {formatDate(comment.createdAt)}
+                  </small>
                 </div>
               </div>
             ))}

@@ -100,7 +100,7 @@ const Home = () => {
       const postData = {
         content: newPostContent,
         authorId: user.id,
-        imageUrl: null,
+        imageUrl: profileImage,
       };
 
       await postService.createPost(postData);
