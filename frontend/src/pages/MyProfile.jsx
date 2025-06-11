@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import background from "../assets/blank-profile.png";
 import { IoIosAddCircle } from "react-icons/io";
+import { FaCamera } from "react-icons/fa";
 import "../styles/MyProfile.css";
 import StartupCard from "../components/StartupCard";
 import blankProfile from "../assets/blank-profile.png";
@@ -10,6 +11,7 @@ import { getUserInfoFromToken } from "../utils/jwtDecode";
 import { userService } from "../service/userService";
 import { startupService } from "../service/startupService";
 import { toast } from "react-toastify";
+import { photoService } from "../service/photoService";
 
 const MyProfile = () => {
   const [user, setUser] = useState(null);
@@ -34,6 +36,11 @@ const MyProfile = () => {
     size: "",
   });
 
+  const [profileImage, setProfileImage] = useState(null);
+  const [backgroundImage, setBackgroundImage] = useState(null);
+  const [uploadingProfile, setUploadingProfile] = useState(false);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
+
   const navigate = useNavigate();
   const decoded = getUserInfoFromToken(localStorage.getItem("token"));
 
@@ -47,6 +54,8 @@ const MyProfile = () => {
         username: response.username || "",
         phoneNo: response.phoneNo || "",
       });
+
+      await loadUserImages(response.id);
     };
     getUserData();
   }, [decoded.sub]);
@@ -60,6 +69,104 @@ const MyProfile = () => {
       getUserStartups();
     }
   }, [user]);
+
+  const loadUserImages = async (userId) => {
+    try {
+      const profileImg = await photoService.getPhotoByEntityAndRole(
+        userId,
+        "user",
+        "profile"
+      );
+      const backgroundImg = await photoService.getPhotoByEntityAndRole(
+        userId,
+        "user",
+        "background"
+      );
+
+      setProfileImage(profileImg?.url || blankProfile);
+      setBackgroundImage(backgroundImg?.url || background);
+    } catch (error) {
+      console.error("Error loading user images:", error);
+    }
+  };
+
+  const handleImageUpload = async (file, role) => {
+    if (!file || !user) return;
+
+    const formData = new FormData();
+    formData.append("files", file);
+    formData.append("entityId", user.id.toString());
+    formData.append("entityType", "user");
+    formData.append("role", role);
+
+    try {
+      if (role === "profile") {
+        setUploadingProfile(true);
+      } else {
+        setUploadingBackground(true);
+      }
+
+      const response = await photoService.uploadPhoto(formData);
+
+      if (response) {
+        toast.success(
+          `${
+            role === "profile" ? "Profile" : "Background"
+          } image updated successfully!`
+        );
+        await loadUserImages(user.id);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error(
+        `Failed to upload ${
+          role === "profile" ? "profile" : "background"
+        } image`
+      );
+    } finally {
+      if (role === "profile") {
+        setUploadingProfile(false);
+      } else {
+        setUploadingBackground(false);
+      }
+    }
+  };
+
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please select a valid image file (JPEG, PNG, or GIF)");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
+
+      handleImageUpload(file, "profile");
+    }
+  };
+
+  const handleBackgroundImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please select a valid image file (JPEG, PNG, or GIF)");
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Image size should be less than 10MB");
+        return;
+      }
+
+      handleImageUpload(file, "background");
+    }
+  };
 
   if (!user) {
     return (
@@ -128,17 +235,60 @@ const MyProfile = () => {
       <div className="container d-flex justify-content-center">
         <div className="profile-container mt-3">
           <div
-            className="profile-banner"
+            className="profile-banner position-relative"
             style={{
-              backgroundImage: `url(${background})`,
+              backgroundImage: `url(${backgroundImage || background})`,
             }}
-          />
+          >
+            <div className="position-absolute top-0 end-0 m-2">
+              <label
+                htmlFor="background-upload"
+                className="btn btn-sm btn-light opacity-75"
+                style={{ cursor: "pointer" }}
+              >
+                <FaCamera />
+                {uploadingBackground && (
+                  <span className="ms-1">Uploading...</span>
+                )}
+              </label>
+              <input
+                id="background-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleBackgroundImageChange}
+                style={{ display: "none" }}
+                disabled={uploadingBackground}
+              />
+            </div>
+          </div>
+
           <div
-            className="profile-picture"
+            className="profile-picture position-relative"
             style={{
-              backgroundImage: `url(${background})`,
+              backgroundImage: `url(${profileImage || blankProfile})`,
             }}
-          />
+          >
+            <div className="position-absolute bottom-0 end-0">
+              <label
+                htmlFor="profile-upload"
+                className="btn btn-sm btn-primary rounded-circle"
+                style={{ cursor: "pointer" }}
+              >
+                <FaCamera size={12} />
+                {uploadingProfile && (
+                  <span className="visually-hidden">Uploading...</span>
+                )}
+              </label>
+              <input
+                id="profile-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleProfileImageChange}
+                style={{ display: "none" }}
+                disabled={uploadingProfile}
+              />
+            </div>
+          </div>
           <div className="profile-info text-center">
             <h2 className="profile-name">
               {user?.firstName} {user?.lastName}
@@ -344,6 +494,7 @@ const MyProfile = () => {
         </div>
       )}
 
+      {/* Startup Modal */}
       {showStartupModal && (
         <div
           className="modal fade show"
@@ -358,7 +509,9 @@ const MyProfile = () => {
           >
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h5 className="modal-title">Create Startup</h5>
+                <h5 className="modal-title">
+                  {editStartup ? "Edit Startup" : "Create Startup"}
+                </h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -459,13 +612,15 @@ const MyProfile = () => {
                 </form>
               </div>
               <div className="modal-footer d-flex justify-content-between">
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => handleDeleteStartup(editStartup.id)}
-                >
-                  Delete Startup
-                </button>
+                {editStartup && (
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => handleDeleteStartup(editStartup.id)}
+                  >
+                    Delete Startup
+                  </button>
+                )}
                 <div className="d-flex gap-3">
                   <button
                     type="button"
@@ -482,7 +637,7 @@ const MyProfile = () => {
                     className="btn btn-primary"
                     onClick={handleSaveStartup}
                   >
-                    Create
+                    {editStartup ? "Update" : "Create"}
                   </button>
                 </div>
               </div>
