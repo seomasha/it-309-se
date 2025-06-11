@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import { startupService } from "../service/startupService";
+import { photoService } from "../service/photoService";
 import blankProfile from "../assets/blank-profile.png";
 import StartupCard from "../components/StartupCard";
 
 const Startups = () => {
   const [allStartups, setAllStartups] = useState([]);
   const [startups, setStartups] = useState([]);
+  const [startupLogos, setStartupLogos] = useState({});
   const [recentSearches, setRecentSearches] = useState([]);
   const [searchValue, setSearchValue] = useState("");
 
@@ -23,6 +25,8 @@ const Startups = () => {
     location: [],
   });
 
+  console.log(startupLogos);
+
   useEffect(() => {
     const fetchStartups = async () => {
       const response = await startupService.getAllStartups();
@@ -33,6 +37,32 @@ const Startups = () => {
         size: [...new Set(response.map((s) => s.size))],
         location: [...new Set(response.map((s) => s.location))],
       });
+
+      // Fetch logos for all startups
+      const logoPromises = response.map(async (startup) => {
+        try {
+          const logoResponse = await photoService.getPhotoByEntityAndRole(
+            startup.id,
+            "startup",
+            "logo"
+          );
+          return { startupId: startup.id, logo: logoResponse };
+        } catch (error) {
+          console.error(
+            `Failed to fetch logo for startup ${startup.id}:`,
+            error
+          );
+          return { startupId: startup.id, logo: null };
+        }
+      });
+
+      const logoResults = await Promise.all(logoPromises);
+      const logoMap = logoResults.reduce((acc, { startupId, logo }) => {
+        acc[startupId] = logo;
+        return acc;
+      }, {});
+
+      setStartupLogos(logoMap);
     };
     fetchStartups();
   }, []);
@@ -141,35 +171,25 @@ const Startups = () => {
               onSearch={handleSearch}
             />
 
-            <div className="d-flex rounded-4 bg-white border p-5 mt-3 gap-3 justify-content-center">
+            <div className="rounded-4 bg-white border p-5 mt-3">
               {startups.length === 0 ? (
                 <p>No startups found.</p>
               ) : (
-                startups
-                  .reduce((rows, startup, index) => {
-                    if (index % 2 === 0) {
-                      rows.push([startup]);
-                    } else {
-                      rows[rows.length - 1].push(startup);
-                    }
-                    return rows;
-                  }, [])
-                  .map((pair, rowIndex) => (
-                    <div className="row w-100 mb-4" key={rowIndex}>
-                      {pair.map((startup) => (
-                        <div key={startup.id} className="mt-3">
-                          <StartupCard
-                            logo={blankProfile}
-                            name={startup.name}
-                            description={startup.description}
-                            industry={startup.industry}
-                            companySize={startup.size}
-                            location={startup.location}
-                          />
-                        </div>
-                      ))}
+                <div className="row g-4">
+                  {startups.map((startup) => (
+                    <div key={startup.id} className="col-md-6">
+                      {console.log(startupLogos[startup.id]?.url)}
+                      <StartupCard
+                        logo={startupLogos[startup.id]?.url || blankProfile}
+                        name={startup.name}
+                        description={startup.description}
+                        industry={startup.industry}
+                        companySize={startup.size}
+                        location={startup.location}
+                      />
                     </div>
-                  ))
+                  ))}
+                </div>
               )}
             </div>
           </div>
