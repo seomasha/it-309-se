@@ -124,7 +124,6 @@ const Post = ({ post, currentUser, onLike, onComment }) => {
             <h6 className="mt-3 primary-color">
               {displayName}
               <br />
-              <span className="text-secondary">{displayUsername}</span>
             </h6>
             <p>{formatDate(post.createdAt)}</p>
           </div>
