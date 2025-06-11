@@ -124,12 +124,14 @@ const SignUp = () => {
     setErrors(newErrors);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (Object.values(errors).every((error) => error === "")) {
-      userService.create(formData);
-      toast.success("Account succesfully created!");
-      resetFields();
+      const response = await userService.create(formData);
+      if (response) {
+        toast.success("Account succesfully created!");
+        resetFields();
+      }
     }
   };
 
@@ -169,6 +171,7 @@ const SignUp = () => {
                   placeholder="Enter your first name"
                   value={formData.firstName}
                   onChange={handleChange}
+                  required
                 />
                 {errors.firstName && (
                   <div className="invalid-feedback">{errors.firstName}</div>
@@ -185,6 +188,7 @@ const SignUp = () => {
                   placeholder="Enter your last name"
                   value={formData.lastName}
                   onChange={handleChange}
+                  required
                 />
                 {errors.lastName && (
                   <div className="invalid-feedback">{errors.lastName}</div>
@@ -203,6 +207,7 @@ const SignUp = () => {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
+                required
               />
               {errors.email && (
                 <div className="invalid-feedback">{errors.email}</div>
@@ -220,6 +225,7 @@ const SignUp = () => {
                 placeholder="Enter your username"
                 value={formData.username}
                 onChange={handleChange}
+                required
               />
               {errors.username && (
                 <div className="invalid-feedback">{errors.username}</div>
@@ -237,6 +243,7 @@ const SignUp = () => {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
+                required
               />
               {errors.password && (
                 <div className="invalid-feedback">{errors.password}</div>
@@ -254,6 +261,7 @@ const SignUp = () => {
                 placeholder="Confirm your password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                required
               />
               {errors.confirmPassword && (
                 <div className="invalid-feedback">{errors.confirmPassword}</div>
@@ -271,6 +279,7 @@ const SignUp = () => {
                 placeholder="Enter your phone number"
                 value={formData.phoneNo}
                 onChange={handleChange}
+                required
               />
               {errors.phoneNo && (
                 <div className="invalid-feedback">{errors.phoneNo}</div>
