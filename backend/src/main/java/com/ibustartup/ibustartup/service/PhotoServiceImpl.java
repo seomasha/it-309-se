@@ -61,17 +61,37 @@ public class PhotoServiceImpl implements PhotoService {
                                   final String role) throws IOException {
         final String fileName = file.getOriginalFilename();
 
-        uploadToSupabase(file, fileName);
-        final String fileUrl = supabaseURL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + fileName;
+        Photo existingPhoto = photoRepository.findByEntityIdAndEntityTypeAndRole(entityId, entityType, role);
 
-        final Photo photo = new Photo();
-        photo.setUrl(fileUrl);
-        photo.setType(file.getContentType());
-        photo.setEntityId(entityId);
-        photo.setEntityType(entityType);
-        photo.setRole(role);
+        if (existingPhoto != null) {
+            try {
+                final String oldUrl = existingPhoto.getUrl();
+                final String oldFileName = oldUrl.substring(oldUrl.lastIndexOf("/") + 1);
+                deleteFromSupabase(oldFileName);
+            } catch (Exception e) {
+                System.err.println("Failed to delete old photo from Supabase: " + e.getMessage());
+            }
 
-        return photoRepository.save(photo);
+            uploadToSupabase(file, fileName);
+            final String fileUrl = supabaseURL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + fileName;
+
+            existingPhoto.setUrl(fileUrl);
+            existingPhoto.setType(file.getContentType());
+
+            return photoRepository.save(existingPhoto);
+        } else {
+            uploadToSupabase(file, fileName);
+            final String fileUrl = supabaseURL + "/storage/v1/object/public/" + BUCKET_NAME + "/" + fileName;
+
+            final Photo photo = new Photo();
+            photo.setUrl(fileUrl);
+            photo.setType(file.getContentType());
+            photo.setEntityId(entityId);
+            photo.setEntityType(entityType);
+            photo.setRole(role);
+
+            return photoRepository.save(photo);
+        }
     }
 
     @Override
